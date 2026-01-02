@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>RAG Chatbot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1e1e2f, #2b2b45);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      color: white;
+    }
+
+    .chat-container {
+      width: 420px;
+      height: 600px;
+      background: #121222;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      overflow: hidden;
+      animation: fadeIn 0.8s ease;
+    }
+
+    .header {
+      padding: 16px;
+      background: #1f1f35;
+      text-align: center;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+    }
+
+    .messages {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .message {
+      margin-bottom: 12px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      max-width: 80%;
+      animation: slideUp 0.3s ease;
+      line-height: 1.4;
+    }
+
+    .user {
+      background: #4e8cff;
+      align-self: flex-end;
+    }
+
+    .bot {
+      background: #2a2a40;
+      align-self: flex-start;
+    }
+
+    .input-area {
+      display: flex;
+      padding: 12px;
+      border-top: 1px solid #2c2c45;
+    }
+
+    input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+    }
+
+    button {
+      margin-left: 8px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      background: #4e8cff;
+      color: white;
+      transition: background 0.2s ease;
+    }
+
+    button:hover {
+      background: #3b74d8;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="chat-container">
+  <div class="header">Chatbot Using RAG</div>
+
+  <div class="messages" id="messages">
+    <div class="message bot">
+      Hi! Ask me anything based on the document 📘
+    </div>
+  </div>
+
+  <div class="input-area">
+    <input id="input" placeholder="Ask a question..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<script>
+  const messages = document.getElementById("messages");
+  const input = document.getElementById("input");
+
+  function addMessage(text, type) {
+    const div = document.createElement("div");
+    div.className = `message ${type}`;
+    div.innerText = text;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  async function sendMessage() {
+    const question = input.value.trim();
+    if (!question) return;
+
+    addMessage(question, "user");
+    input.value = "";
+
+    addMessage("Thinking...", "bot");
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/chat", {
+            method: "POST",
+             headers: { "Content-Type": "application/json" },
+             body: JSON.stringify({ query: question })
+            });
+
+      const data = await response.json();
+
+      messages.lastChild.remove(); // remove "Thinking..."
+      addMessage(data.response, "bot");
+
+    } catch (err) {
+      messages.lastChild.remove();
+      addMessage("⚠️ Error connecting to server", "bot");
+    }
+  }
+
+  input.addEventListener("keypress", function(e) {
+    if (e.key === "Enter") sendMessage();
+  });
+</script>
+
+</body>
+</html>
