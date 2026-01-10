@@ -45,8 +45,8 @@ def chunk_text(text: str, chunk_size=220, overlap=55):
 
 # ----------------------------------
 # EMBEDDINGS
-# ----------------------------------
-print("🔍 Loading embedding model...")
+    # ----------------------------------
+    print("🔍 Loading embedding model...")
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 print("✅ Embedding model loaded")
 
