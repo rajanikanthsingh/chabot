@@ -6,6 +6,8 @@ from sentence_transformers import SentenceTransformer
 import faiss
 from numpy.linalg import norm
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
@@ -157,6 +159,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Serve static files (CSS, JS, etc.)
+app.mount("/static", StaticFiles(directory="UI"), name="static")
+
+# Serve the chat interface at root
+@app.get("/")
+def serve_chat_interface():
+    return FileResponse("UI/index.html")
 
 class ChatRequest(BaseModel):
     query: str
